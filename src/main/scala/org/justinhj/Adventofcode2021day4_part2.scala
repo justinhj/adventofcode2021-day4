@@ -85,10 +85,10 @@ object Adventofcode2021day4_part2 extends App {
     (numbers.toList, boards.result())
   }
 
-  // For part 2 we are interested in the order of winners. Let's track the winners in a list and
+  // For part 2 we are interested in the order of winners. Let's track the winners in a stack and
   // and return the last one. Note that we must not count boards multiple times, so I need a win flag
   def solve(numbers: List[Int], boards: List[Board]): Int = {
-    val winners = ListBuffer.empty[Int]
+    val winners = mutable.Stack.empty[Int]
     numbers.zipWithIndex.foreach {
       case (ball,i) => 
         boards.foreach {
@@ -102,8 +102,7 @@ object Adventofcode2021day4_part2 extends App {
             }
         }
     }
-    val wins = winners.result()
-    wins.reverse.head
+    winners.head
   }
 
   val exampleInput = inputToStrings("example.txt") 
