@@ -1,16 +1,11 @@
 package org.justinhj
 
 import zio.prelude.NonEmptyList
-import scala.io.Source
-import scala.collection.mutable
 
-object AOCUtil {
-  def inputToStrings(name: String): NonEmptyList[String] = {
-    val iter = Source.fromResource(name).getLines().to(Iterable)
-    NonEmptyList.fromIterable(iter.head, iter.tail)
-  }
-}
-object Adventofcode2021day4 extends App {
+import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
+
+object Adventofcode2021day4_part2 extends App {
 
   import AOCUtil._
 
@@ -18,7 +13,7 @@ object Adventofcode2021day4 extends App {
 
   case class Square(value: Int, var marked: Boolean = false)
 
-  case class Board(squares: Array[Array[Square]]) {
+  case class Board(squares: Array[Array[Square]], var won: Boolean = false) {
 
     def checkRowWin(ri: Int): Boolean = {
       squares(ri).forall(_.marked)
@@ -33,11 +28,17 @@ object Adventofcode2021day4 extends App {
 
     def checkWin(): Boolean = {
       for (ri <- squares.indices) {
-        if(checkRowWin(ri)) return true
+        if(checkRowWin(ri)) {
+          won = true
+          return true
+        }
       }
 
       for (ci <- squares(0).indices) {
-        if(checkColWin(ci)) return true
+        if(checkColWin(ci)) {
+          won = true
+          return true
+        }
       }
      
       false  
@@ -84,20 +85,25 @@ object Adventofcode2021day4 extends App {
     (numbers.toList, boards.result())
   }
 
+  // For part 2 we are interested in the order of winners. Let's track the winners in a list and
+  // and return the last one. Note that we must not count boards multiple times, so I need a win flag
   def solve(numbers: List[Int], boards: List[Board]): Int = {
+    val winners = ListBuffer.empty[Int]
     numbers.zipWithIndex.foreach {
       case (ball,i) => 
         boards.foreach {
           board =>
             if(board.mark(ball)) {
+              val alreadyWon = board.won
               val score = board.score()
-              if(score > 0) {
-                return score * ball
+              if(score > 0 && !alreadyWon) {
+                winners += (score * ball)
               }
             }
         }
     }
-    0
+    val wins = winners.result()
+    wins.reverse.head
   }
 
   val exampleInput = inputToStrings("example.txt") 
